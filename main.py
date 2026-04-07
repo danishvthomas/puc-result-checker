@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 BOT_TOKEN   = "8774137507:AAFRsdXTb342GX8zJkuGZphRjkIf3G7aOvA"
 CHAT_ID     = "1832034904"
@@ -9,6 +9,13 @@ CHECK_EVERY = 20 * 60
 
 CHECK_URL = "https://karresults.nic.in"
 KEYWORDS  = ["2nd puc", "puc 2", "2026"]
+
+def get_ist_time():
+    ist = datetime.utcnow() + timedelta(hours=5, minutes=30)
+    day_str  = ist.strftime("%A")           # Tuesday
+    date_str = ist.strftime("%d %b %Y")     # 08 Apr 2026
+    time_str = ist.strftime("%I:%M %p")     # 06:35 AM
+    return day_str, date_str, time_str
 
 def send_telegram(message):
     try:
@@ -32,27 +39,42 @@ def is_result_live():
         print(f"❌ Site error: {e}")
         return False, None
 
+# ── START ────────────────────────────────
 print("🚀 PUC Result Checker started!")
-send_telegram("🚀 Bot started! Checking karresults.nic.in every 20 minutes for Karnataka 2nd PUC Result 2026...")
+day, date, time_ist = get_ist_time()
+send_telegram(
+    f"🚀 Bot Started!\n"
+    f"📅 {day}, {date}\n"
+    f"🕐 {time_ist} IST\n\n"
+    f"Checking karresults.nic.in every 20 minutes for Karnataka 2nd PUC Result 2026..."
+)
 
+# ── MAIN LOOP ────────────────────────────
 check_count = 0
 while True:
     check_count += 1
-    now = datetime.now().strftime("%d %b %Y, %I:%M %p")
-    print(f"[Check #{check_count}] {now} — Checking...")
+    day, date, time_ist = get_ist_time()
+    print(f"[Check #{check_count}] {day}, {date} {time_ist} IST — Checking...")
 
     found, link_text = is_result_live()
 
     if found:
+        day, date, time_ist = get_ist_time()
         send_telegram(
-            f"🎉 Karnataka 2nd PUC Result 2026 is LIVE!\n"
+            f"🎉 Karnataka 2nd PUC Result 2026 is LIVE!\n\n"
+            f"📅 {day}, {date}\n"
+            f"🕐 {time_ist} IST\n\n"
             f"📌 {link_text}\n"
             f"🔗 Check now: https://karresults.nic.in"
         )
-        print("🎉 Done!")
+        print("🎉 Result found! Notification sent.")
         break
     else:
-        now = datetime.now().strftime("%I:%M %p")
-        send_telegram(f"⏳ Check #{check_count} at {now} — Result not yet live. Will check again in 20 minutes.")
+        send_telegram(
+            f"⏳ Check #{check_count}\n"
+            f"📅 {day}, {date}\n"
+            f"🕐 {time_ist} IST\n\n"
+            f"Result not yet live. Will check again in 20 minutes."
+        )
         print(f"   ⏳ Not live yet. Next check in 20 mins...\n")
         time.sleep(CHECK_EVERY)
