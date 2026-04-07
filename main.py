@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import time
 from datetime import datetime
 
-BOT_TOKEN   = "YOUR_NEW_BOT_TOKEN"   # use new token after revoking old one
+BOT_TOKEN   = "8774137507:AAFRsdXTb342GX8zJkuGZphRjkIf3G7aOvA"
 CHAT_ID     = "1832034904"
 CHECK_EVERY = 20 * 60
 
@@ -33,14 +33,16 @@ def is_result_live():
         return False, None
 
 print("🚀 PUC Result Checker started!")
-send_telegram("✅ Bot is live on cloud! Will notify when Karnataka 2nd PUC Result 2026 is declared 🎯")
+send_telegram("🚀 Bot started! Checking karresults.nic.in every 20 minutes for Karnataka 2nd PUC Result 2026...")
 
 check_count = 0
 while True:
     check_count += 1
     now = datetime.now().strftime("%d %b %Y, %I:%M %p")
     print(f"[Check #{check_count}] {now} — Checking...")
+
     found, link_text = is_result_live()
+
     if found:
         send_telegram(
             f"🎉 Karnataka 2nd PUC Result 2026 is LIVE!\n"
@@ -50,5 +52,7 @@ while True:
         print("🎉 Done!")
         break
     else:
+        now = datetime.now().strftime("%I:%M %p")
+        send_telegram(f"⏳ Check #{check_count} at {now} — Result not yet live. Will check again in 20 minutes.")
         print(f"   ⏳ Not live yet. Next check in 20 mins...\n")
         time.sleep(CHECK_EVERY)
